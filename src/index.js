@@ -15,10 +15,11 @@ function init() {
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.setSize(w, h);
-	// renderer.setClearColor(0xEFEFEF);
-	renderer.setClearColor(0x47B6A5);
+	renderer.setClearColor(0xEFEFEF);
+	// renderer.setClearColor(0x47B6A5);
 	// renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setPixelRatio(1);
+	console.log(renderer);
 	container.appendChild(renderer.domElement);
 
 	scene = new THREE.Scene();
@@ -45,9 +46,13 @@ function init() {
 function render() {
 	// window.requestAnimationFrame(render);
 	renderer.render(scene, camera);
-	document.body.appendChild(svgExport(boxy, camera, renderer.context.canvas));
+	document.body.appendChild(svgExport(boxy, camera, renderer));
 	// console.log(svgExport(boxy, camera, renderer.context.canvas));
 	// controls.update();
 }
+
+document.addEventListener('click', function(e) {
+	console.log(e.pageX, e.pageY);
+})
 
 init();

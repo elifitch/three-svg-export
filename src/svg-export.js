@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
-export function svgExport(obj, camera, canvas) {
+export function svgExport(obj, camera, renderer) {
 	const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	const canvas = renderer.context.canvas;
 	const raycaster = new THREE.Raycaster();
 	const cameraPosition = camera.position.clone();
 	const vertices = obj.geometry.vertices
@@ -9,13 +10,13 @@ export function svgExport(obj, camera, canvas) {
 	svg.setAttribute("viewBox", `0 0 ${canvas.width} ${canvas.height}`);
 	obj.updateMatrixWorld();
 
-	const sortedFaces = obj.geometry.faces.map(face => {
-		face.distance = faceCentroid(face, vertices).distanceTo(cameraPosition);
+	obj.geometry.faces.map(face => {
+		face.centroid = faceCentroid(face, vertices);
+		face.distance = face.centroid.distanceTo(cameraPosition);
 		return face;
-	}).sort(dynamicSort("distance"));
-
-
-	sortedFaces.forEach(face => {
+	})
+	.sort(dynamicSort("distance"))
+	.forEach(face => {
 		let coords = {};
 		let polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
 
@@ -23,6 +24,7 @@ export function svgExport(obj, camera, canvas) {
 		coords.b = coordsFromVertex(vertices[face.b], camera, canvas);
 		coords.c = coordsFromVertex(vertices[face.c], camera, canvas);
 		polygon.setAttribute("points", `${coords.a.x},${coords.a.y} ${coords.b.x},${coords.b.y} ${coords.c.x},${coords.c.y}`);
+		polygon.style.fill = colorAtPoint(face.centroid, camera, canvas, renderer);
 		svg.appendChild(polygon);
 	});
 
@@ -64,25 +66,30 @@ function dynamicSort(property) {
     }
 }
 
-// function faceIsVisible(face, raycaster, cameraPosition) {
-// 	raycaster.set();
-// }
+function colorAtPoint(vector, camera, canvas, renderer) {
+	const coord = vector.clone().project(camera);
+	const widthHalf = 0.5 * canvas.width;
+	const heightHalf = 0.5 * canvas.height;
+	const gl = renderer.getContext();
+	// let pixels = new Uint8Array(4 * canvas.width * canvas.height);
+	let pixel = new Uint8Array(4);
 
-// function toScreenPosition(obj, camera, canvas) {
-//     var vector = new THREE.Vector3();
+	// coord.x = Math.abs( ( coord.x * widthHalf ) + widthHalf );
+	// coord.y = Math.abs( -( coord.y * heightHalf ) + heightHalf );
+	coord.x = ( coord.x * widthHalf ) + widthHalf;
+	coord.y = -( coord.y * heightHalf ) + heightHalf;
+	gl.readPixels(coord.x, coord.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
 
-//     var widthHalf = 0.5 * canvas.width;
-//     var heightHalf = 0.5 * canvas.height;
+	let hex = "#" + ("000000" + rgbToHex(pixel[0], pixel[1], pixel[2])).slice(-6);
+	console.log(coord);
+	console.log(hex);
+	return hex;
+}
 
-//     vector.setFromMatrixPosition(obj.matrixWorld);
-//     vector.project(camera);
+function rgbToHex(r, g, b) {
+    if (r > 255 || g > 255 || b > 255) {
+    	console.error("Invalid color component");
+    }
+    return ((r << 16) | (g << 8) | b).toString(16);
+}
 
-//     vector.x = ( vector.x * widthHalf ) + widthHalf;
-//     vector.y = - ( vector.y * heightHalf ) + heightHalf;
-
-//     return {
-//         x: vector.x,
-//         y: vector.y
-//     };
-
-// }
