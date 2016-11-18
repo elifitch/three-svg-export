@@ -31,10 +31,16 @@ function init() {
 	const hemilight = new THREE.HemisphereLight(0xFFFFFF, 0xFAFAFA, 2);
 	scene.add(hemilight);
 
-	boxy = new THREE.Mesh(
-		new THREE.BoxGeometry(1,1,1),
-		new THREE.MeshNormalMaterial()
-	);
+	// boxy = new THREE.Mesh(
+	// 	new THREE.BoxGeometry(1,1,1),
+	// 	new THREE.MeshNormalMaterial()
+	// );
+	boxy = THREE.SceneUtils.createMultiMaterialObject( new THREE.BoxGeometry(5,5,5), [
+
+	new THREE.MeshLambertMaterial( { color: 0x000000} ),
+	new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true, wireframeLinewidth: 3} )
+
+	]);
 	scene.add(boxy);
 
 	scene.add(camera);
