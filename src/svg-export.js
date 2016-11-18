@@ -78,6 +78,7 @@ function colorAtPoint(vector, camera, canvas, renderer) {
 	// coord.y = Math.abs( -( coord.y * heightHalf ) + heightHalf );
 	coord.x = ( coord.x * widthHalf ) + widthHalf;
 	coord.y = -( coord.y * heightHalf ) + heightHalf;
+	// let fb = gl.createFramebuffer();
 	gl.readPixels(coord.x, coord.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
 
 	let hex = "#" + ("000000" + rgbToHex(pixel[0], pixel[1], pixel[2])).slice(-6);
