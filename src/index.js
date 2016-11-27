@@ -2,18 +2,22 @@ import * as THREE from 'three';
 import { svgExport } from './svg-export.js';
 import styles from './index.scss';
 
-let scene;
+const container = document.getElementsByClassName('container')[0];;
+let renderScene;
+let faceScene;
 let camera;
 let renderer;
+let renderTarget;
+let faceTarget;
 let boxy;
+let faceBox;
 
 
 function init() {
-	const container = document.getElementsByClassName('container')[0];
 	const w = container.offsetWidth;
 	const h = container.offsetHeight;
 
-	renderer = new THREE.WebGLRenderer({antialias: true});
+	renderer = new THREE.WebGLRenderer({antialias: false, preserveDrawingBuffer: true});
 	renderer.setSize(w, h);
 	renderer.setClearColor(0xEFEFEF);
 	// renderer.setClearColor(0x47B6A5);
@@ -22,28 +26,28 @@ function init() {
 	console.log(renderer);
 	container.appendChild(renderer.domElement);
 
-	scene = new THREE.Scene();
+	renderScene = new THREE.Scene();
+	faceScene = new THREE.Scene();
 
 	camera = new THREE.PerspectiveCamera(45, w/h, 1, 1000);
 	camera.position.set(10, 5, 5);
-	camera.lookAt(scene.position);
+	camera.lookAt(renderScene.position);
 
 	const hemilight = new THREE.HemisphereLight(0xFFFFFF, 0xFAFAFA, 2);
-	scene.add(hemilight);
+	renderScene.add(hemilight);
 
-	// boxy = new THREE.Mesh(
-	// 	new THREE.BoxGeometry(1,1,1),
-	// 	new THREE.MeshNormalMaterial()
-	// );
-	boxy = THREE.SceneUtils.createMultiMaterialObject( new THREE.BoxGeometry(5,5,5), [
-
-	new THREE.MeshLambertMaterial( { color: 0x000000} ),
-	new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true, wireframeLinewidth: 3} )
-
+	boxy = new THREE.Mesh(
+		new THREE.BoxGeometry(1,1,1),
+		new THREE.MeshNormalMaterial()
+	);
+	faceBox = THREE.SceneUtils.createMultiMaterialObject( new THREE.BoxGeometry(5,5,5), [
+		new THREE.MeshLambertMaterial( { color: 0x000000} ),
+		new THREE.MeshBasicMaterial( { color: 0xff00ff, wireframe: true, wireframeLinewidth: 3} )
 	]);
-	scene.add(boxy);
+	renderScene.add(boxy);
+	faceScene.add(faceBox);
 
-	scene.add(camera);
+	renderScene.add(camera);
 
 	render();
 	console.log('asf')
@@ -51,9 +55,8 @@ function init() {
 
 function render() {
 	// window.requestAnimationFrame(render);
-	renderer.render(scene, camera);
+	renderer.render(renderScene, camera);
 	document.body.appendChild(svgExport(boxy, camera, renderer));
-	// console.log(svgExport(boxy, camera, renderer.context.canvas));
 	// controls.update();
 }
 

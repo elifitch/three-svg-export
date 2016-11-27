@@ -24,7 +24,7 @@ export function svgExport(obj, camera, renderer) {
 		coords.b = coordsFromVertex(vertices[face.b], camera, canvas);
 		coords.c = coordsFromVertex(vertices[face.c], camera, canvas);
 		polygon.setAttribute("points", `${coords.a.x},${coords.a.y} ${coords.b.x},${coords.b.y} ${coords.c.x},${coords.c.y}`);
-		polygon.style.fill = colorAtPoint(face.centroid, camera, canvas, renderer);
+		polygon.style.fill = hexColorAtPoint(face.centroid, camera, canvas, renderer);
 		svg.appendChild(polygon);
 	});
 
@@ -36,7 +36,7 @@ function coordsFromVertex(vertex, camera, canvas) {
 	const heightHalf = 0.5 * canvas.height;
 	const coord = vertex.clone().project(camera);
 	coord.x = ( coord.x * widthHalf ) + widthHalf;
-	coord.y = - ( coord.y * heightHalf ) + heightHalf;
+	coord.y = -( coord.y * heightHalf ) + heightHalf;
 	return coord;
 }
 
@@ -50,7 +50,6 @@ function faceCentroid(face, vertices) {
 	centroid.x = ( v1.x + v2.x + v3.x ) / 3;
 	centroid.y = ( v1.y + v2.y + v3.y ) / 3;
 	centroid.z = ( v1.z + v2.z + v3.z ) / 3;
-	// console.log(centroid);
 	return centroid;
 }
 
@@ -66,24 +65,18 @@ function dynamicSort(property) {
     }
 }
 
-function colorAtPoint(vector, camera, canvas, renderer) {
+function hexColorAtPoint(vector, camera, canvas, renderer) {
 	const coord = vector.clone().project(camera);
 	const widthHalf = 0.5 * canvas.width;
 	const heightHalf = 0.5 * canvas.height;
 	const gl = renderer.getContext();
-	// let pixels = new Uint8Array(4 * canvas.width * canvas.height);
 	let pixel = new Uint8Array(4);
 
-	// coord.x = Math.abs( ( coord.x * widthHalf ) + widthHalf );
-	// coord.y = Math.abs( -( coord.y * heightHalf ) + heightHalf );
 	coord.x = ( coord.x * widthHalf ) + widthHalf;
-	coord.y = -( coord.y * heightHalf ) + heightHalf;
-	// let fb = gl.createFramebuffer();
+	coord.y = ( coord.y * heightHalf ) + heightHalf;
 	gl.readPixels(coord.x, coord.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
 
 	let hex = "#" + ("000000" + rgbToHex(pixel[0], pixel[1], pixel[2])).slice(-6);
-	console.log(coord);
-	console.log(hex);
 	return hex;
 }
 
